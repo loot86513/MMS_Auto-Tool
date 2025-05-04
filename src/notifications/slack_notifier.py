@@ -11,6 +11,10 @@ class SlackNotifier:
     def __init__(self, webhook_url: str):
         self.webhook_url = webhook_url
         self.logger = logging.getLogger(__name__)
+        # 驗證 webhook URL
+        if not webhook_url or not webhook_url.startswith('https://hooks.slack.com/'):
+            self.logger.error(f"無效的 Slack Webhook URL: {webhook_url}")
+            raise ValueError("無效的 Slack Webhook URL")
 
     def _get_urgency_color(self, days_until_expiry: int) -> str:
         """根據到期天數決定訊息顏色"""
@@ -69,6 +73,11 @@ class SlackNotifier:
     def send_expiring_notification(self, institutions: List[Dict]) -> bool:
         """發送到期通知到 Slack"""
         try:
+            # 驗證 webhook URL
+            if not self.webhook_url or not self.webhook_url.startswith('https://hooks.slack.com/'):
+                self.logger.error(f"無效的 Slack Webhook URL: {self.webhook_url}")
+                return False
+
             if not institutions:
                 self.logger.warning("沒有需要通知的機構")
                 return True
@@ -180,27 +189,35 @@ class SlackNotifier:
                 ]
             })
 
-            # 發送訊息到 Slack
-            response = requests.post(
-                self.webhook_url,
-                json={"blocks": blocks},
-                headers={"Content-Type": "application/json"},
-                timeout=10  # 添加超時設定
-            )
+            # 記錄發送的訊息內容
+            self.logger.debug(f"準備發送到 Slack 的訊息內容: {json.dumps(blocks, ensure_ascii=False)}")
 
-            if response.status_code == 200:
-                self.logger.info(f"成功發送 Slack 通知，包含 {len(institutions)} 個機構")
-                return True
-            else:
-                self.logger.error(f"發送 Slack 通知失敗: HTTP {response.status_code} - {response.text}")
+            # 發送訊息到 Slack
+            try:
+                response = requests.post(
+                    self.webhook_url,
+                    json={"blocks": blocks},
+                    headers={"Content-Type": "application/json"},
+                    timeout=10  # 添加超時設定
+                )
+                
+                self.logger.debug(f"Slack API 回應狀態碼: {response.status_code}")
+                self.logger.debug(f"Slack API 回應內容: {response.text}")
+
+                if response.status_code == 200:
+                    self.logger.info(f"成功發送 Slack 通知，包含 {len(institutions)} 個機構")
+                    return True
+                else:
+                    self.logger.error(f"發送 Slack 通知失敗: HTTP {response.status_code} - {response.text}")
+                    return False
+
+            except requests.exceptions.Timeout:
+                self.logger.error("發送 Slack 通知超時")
+                return False
+            except requests.exceptions.RequestException as e:
+                self.logger.error(f"發送 Slack 通知時發生網路錯誤: {str(e)}")
                 return False
 
-        except requests.exceptions.Timeout:
-            self.logger.error("發送 Slack 通知超時")
-            return False
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"發送 Slack 通知時發生網路錯誤: {str(e)}")
-            return False
         except Exception as e:
             self.logger.error(f"發送 Slack 通知時發生未預期的錯誤: {str(e)}")
             return False 
