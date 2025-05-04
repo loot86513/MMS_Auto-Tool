@@ -29,7 +29,7 @@ jobs:
 
     - name: Run MMS notification script
       env:
-        MMS_API_KEY: ${{ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbXlhY2NvdW50Lm5hbmkuY29vbC8iLCJzdWIiOiJ1c2Vycy9PTkVXVDAwNjI4IiwiZnJvbSI6Ik5hbmkiLCJ1c2VybmFtZSI6Ik9ORVdUMDA2MjgiLCJlbWFpbHZhbGlkIjp0cnVlLCJtb2JpbGV2YWxpZCI6ZmFsc2UsImVtYWlsIjoibG9vdDg2NTEzQGdtYWlsLmNvbSIsInVpZCI6Ijc5OGU1NTQwLWQ1MzgtMTFlZS04MDhmLTQ5YzkzYjQxMTkyOCIsImp0aSI6IjlmZjQ3MGEzLTQxOTAtNGQ1Mi04MzczLTQxOWEwYjQ4N2M3NyIsImlhdCI6MTc0MTg1NzA4NiwiZXhwIjoxNzQ3MDQxMDg2fQ.DVZlMyXalq6yXcvrtz9nGIXXMsvHkng0IouuZjgwmWU }}
-        MMS_BASE_URL: ${{ https://api-new.oneclass.co/mms/proxy/link-plus }}
-        SLACK_WEBHOOK_URL: ${{ https://hooks.slack.com/services/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 }}
+        MMS_API_KEY: ${{ secrets.MMS_API_KEY }}
+        MMS_BASE_URL: ${{ secrets.MMS_BASE_URL }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       run: python main.py 
