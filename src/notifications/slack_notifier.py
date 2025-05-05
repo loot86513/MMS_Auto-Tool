@@ -30,26 +30,12 @@ class SlackNotifier:
         days = institution['days_until_expiry']
         urgency_color = self._get_urgency_color(days)
         
-        # 準備聯絡資訊
-        contact_info = []
-        if institution.get('contact_person') and institution['contact_person'] != 'N/A':
-            contact_info.append(f"聯絡人：{institution['contact_person']}")
-        if institution.get('contact_number') and institution['contact_number'] != 'N/A':
-            contact_info.append(f"電話：{institution['contact_number']}")
-        if institution.get('address') and institution['address'] != 'N/A':
-            contact_info.append(f"地址：{institution['address']}")
-        
-        # 如果沒有任何聯絡資訊，添加提示
-        if not contact_info:
-            contact_info.append("⚠️ 無聯絡資訊")
-        
         # 構建訊息文字
         message_text = (
             f"*{institution['name']}*\n"
             f"• 方案：{institution.get('plan_name', 'N/A')}\n"
             f"• 到期日期：{institution.get('expiry_date', 'N/A')}\n"
-            f"• 剩餘天數：{days} 天\n"
-            f"• " + "\n• ".join(contact_info)
+            f"• 剩餘天數：{days} 天"
         )
         
         return {
@@ -65,7 +51,7 @@ class SlackNotifier:
                     "text": "查看詳情",
                     "emoji": True
                 },
-                "url": f"https://oneclub.backstage.oneclass.com.tw/organization/{institution.get('uid', '')}",
+                "url": f"https://oneclub.backstage.oneclass.com.tw/organizationmanagement/organizations/{institution.get('uid', '')}",
                 "style": "primary"
             }
         }
